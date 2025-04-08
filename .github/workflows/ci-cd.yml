@@ -15,10 +15,17 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
       - name: Login to Amazon ECR
         uses: docker/login-action@v1
         with:
-          registry: 920373034562.dkr.ecr.your-region.amazonaws.com
+          registry: 920373034562.dkr.ecr.us-east-2.amazonaws.com
           username: AWS
           password: ${{ secrets.ECR_PASSWORD }}
 
@@ -27,7 +34,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: 920373034562.dkr.ecr.your-region.amazonaws.com/dodiyaapp-repo:latest
+          tags: 920373034562.dkr.ecr.us-east-2.amazonaws.com/dodiyaapp-repo:latest
 
   deploy:
     needs: build
@@ -36,7 +43,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Configure AWS credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -45,4 +52,4 @@ jobs:
 
       - name: Deploy to ECS
         run: |
-          aws ecs update-service --cluster my-cluster --service my-service --force-new-deployment
+          aws ecs update-service --cluster my-cluster --service my-service --force-new-deployment --region us-east-2
